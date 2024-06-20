@@ -10,6 +10,6 @@ Portfolio : https://www.sid-rabhi.fr/
 
 # Mini-projet Serverless
 
-![concept](images/concept.png "concept")
+![concept](img/concept.png "concept")
 
 

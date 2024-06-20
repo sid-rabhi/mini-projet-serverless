@@ -1,0 +1,49 @@
+import boto3
+
+s3_client = boto3.client("s3")
+dynamodb = boto3.resource("dynamodb")
+
+table = dynamodb.Table("database_cloud")
+
+def lambda_handler(event, context):
+    # Extract bucket name and file name from the event
+    bucket_name = event['Records'][0]['s3']['bucket']['name']
+    s3_file_name = event['Records'][0]['s3']['object']['key']
+    
+    # Get the object from the S3 bucket
+    resp = s3_client.get_object(Bucket=bucket_name, Key=s3_file_name)
+    data = resp['Body'].read().decode("utf-8")
+    
+    # Split the data into lines
+    students = data.split("\n")
+    
+    # Process each line of data
+    for stud in students:
+        # Skip empty lines
+        if not stud.strip():
+            continue
+        
+        # Split the line into fields
+        stud_data = stud.split(",")
+        
+        # Check if there are enough fields
+        if len(stud_data) < 3:
+            print(f"Skipping invalid line: {stud}")
+            continue
+        
+        # Convert name and subject to uppercase
+        id = stud_data[0].strip()
+        name = stud_data[1].strip().upper()  # Convert to uppercase
+        subject = stud_data[2].strip().upper()  # Convert to uppercase
+        
+        # Add the item to the DynamoDB table
+        try:
+            table.put_item(
+                Item={
+                    "ID": id,
+                    "Name": name,
+                    "Subject": subject,
+                }
+            )
+        except Exception as e:
+            print(f"Error adding item to DynamoDB: {e}")

@@ -1,0 +1,60 @@
+import json
+import boto3
+
+# Initialisez le client DynamoDB
+dynamodb = boto3.resource('dynamodb')
+dynamodb_table = dynamodb.Table('database_cloud')
+
+def lambda_handler(event, context):
+    print('Request event:', event)
+    
+    http_method = event.get('httpMethod')
+    path = event.get('path')
+    
+    if http_method == 'GET':
+        if path == '/students':
+            response = get_students()
+        else:
+            response = build_response(404, 'Path Not Found')
+    else:
+        response = build_response(405, 'Method Not Allowed')
+    
+    return response
+
+def get_students():
+    try:
+        # Effectue un scan de la table DynamoDB pour récupérer tous les éléments
+        scan_params = {
+            'TableName': dynamodb_table.name
+        }
+        items = scan_dynamo_records(scan_params)
+        
+        # Retourne les éléments de la table dans le format attendu par l'API Gateway
+        return build_response(200, {'students': items})
+    except ClientError as e:
+        print('Error:', e)
+        return build_response(400, e.response['Error']['Message'])
+
+def scan_dynamo_records(scan_params):
+    items = []
+    response = dynamodb_table.scan(**scan_params)
+    
+    # Ajoute les items de la réponse à la liste
+    items.extend(response.get('Items', []))
+    
+    # Si LastEvaluatedKey existe, poursuit le scan pour récupérer tous les éléments
+    while 'LastEvaluatedKey' in response:
+        scan_params['ExclusiveStartKey'] = response['LastEvaluatedKey']
+        response = dynamodb_table.scan(**scan_params)
+        items.extend(response.get('Items', []))
+    
+    return items
+
+def build_response(status_code, body):
+    return {
+        'statusCode': status_code,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps(body)
+    }

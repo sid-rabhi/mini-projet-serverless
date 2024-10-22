@@ -44,11 +44,15 @@ jobs:
         date=$(date +"%Y-%m-%d")
         user_name=$(git config user.name)
         
+        # Display current content for debugging
+        echo "Current content of tag.md before update:"
+        cat tag.md
+        
         # Update the version line
-        sed -i "s/^# Version.*/# Version $new_version/" tag.md
+        sed -i "s/^# Version .*/# Version $new_version/" tag.md || { echo "Failed to update version"; exit 1; }
         
         # Append the versioning log to the table in tag.md
-        echo "| $new_version | $date | Changes made | $user_name |" >> tag.md
+        echo "| $new_version | $date | Changes made | $user_name |" >> tag.md || { echo "Failed to append version log"; exit 1; }
       
     - name: Commit and push changes
       run: |

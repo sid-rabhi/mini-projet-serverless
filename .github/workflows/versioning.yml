@@ -1,4 +1,4 @@
-name: Auto Version Bump with PDF Snapshot
+name: Auto Version Bump with Link to tag.md
 
 on:
   push:
@@ -14,11 +14,6 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
-    - name: Install wkhtmltopdf
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wkhtmltopdf
 
     - name: Get current version
       id: version
@@ -39,14 +34,12 @@ jobs:
         sed -i "s/^# Version.*/# Version $new_version/" tag.md
 
     - name: Commit and push changes
-      env:
-        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
         git add tag.md
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
-        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+        git push
 
     - name: Get latest commit hash
       id: commit_hash
@@ -54,29 +47,14 @@ jobs:
         commit_hash=$(git rev-parse HEAD)
         echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-    - name: Generate PDF from tag.md using wkhtmltopdf
+    - name: Update versioning log with tag.md link
       run: |
         new_version=${{ env.new_version }}
-        wkhtmltopdf tag.md "tag_${new_version}.pdf"
-
-    - name: Move PDF to .tag
-      run: |
-        new_version=${{ env.new_version }}
-        mv "tag_${new_version}.pdf" ".tag/tag_${new_version}.pdf"
-
-    - name: Commit and push the PDF
-      run: |
-        git add ".tag/tag_${{ env.new_version }}.pdf"
-        git commit -m "Add PDF for version ${{ env.new_version }}"
-        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
-
-    - name: Update versioning log with PDF link
-      run: |
-        new_version=${{ env.new_version }}
-        echo "| [$new_version](https://github.com/${{ github.repository }}/raw/main/.tag/tag_${new_version}.pdf) | $(date +"%Y-%m-%d") | Changes made | $(git config user.name) |" >> .tag/VERSIONING.md
+        commit_hash=${{ env.commit_hash }}
+        echo "| [$new_version](https://github.com/${{ github.repository }}/blob/${commit_hash}/tag.md) | $(date +"%Y-%m-%d") | Changes made | ${{ github.actor }} |" >> .tag/VERSIONING.md
 
     - name: Commit and push VERSIONING.md
       run: |
         git add ".tag/VERSIONING.md"  # Ensure to add the VERSIONING.md in the .tag directory
         git commit -m "Update versioning log for ${{ env.new_version }}"
-        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+        git push

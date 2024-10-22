@@ -1,4 +1,4 @@
-# Version 2.18
+# Version 2.19
 
 ## _The Last Markdown Editor, Ever_
 

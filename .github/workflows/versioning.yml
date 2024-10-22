@@ -31,7 +31,6 @@ jobs:
       id: bump
       run: |
         version=${{ env.current_version }}
-        # Ensure only two segments: major and minor
         major=$(echo $version | cut -d '.' -f 1)
         minor=$(echo $version | cut -d '.' -f 2)
         new_version="$major.$((minor + 1))"  # Increment minor
@@ -48,9 +47,21 @@ jobs:
         echo "Current content of tag.md before update:"
         cat tag.md
         
-        # Update the version line
+        # Check if the version line exists
+        if grep -q '^# Version' tag.md; then
+            echo "Found version line in tag.md"
+        else
+            echo "Version line not found!"
+            exit 1
+        fi
+        
+        # Update the version line with a more explicit sed command
         sed -i "s/^# Version .*/# Version $new_version/" tag.md || { echo "Failed to update version"; exit 1; }
         
+        # Display content after sed
+        echo "Content of tag.md after sed command:"
+        cat tag.md
+
         # Append the versioning log to the table in tag.md
         echo "| $new_version | $date | Changes made | $user_name |" >> tag.md || { echo "Failed to append version log"; exit 1; }
       

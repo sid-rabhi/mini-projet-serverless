@@ -12,49 +12,49 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Use Node.js 20
+    - name: Use Node.js 20  # Update to Node.js 20
       uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-version: '20'  # Explicitly set Node.js 20
 
     - name: Checkout repository
-      uses: actions/checkout@v3  # Still using the latest checkout version
-      
+      uses: actions/checkout@v3
+
     - name: Get current version
       id: version
       run: |
-        # Extract the current version from the tag.md file
         current_version=$(grep '^# Version' tag.md | cut -d ' ' -f 3)
         echo "Current version: $current_version"
-        echo "current_version=$current_version" >> $GITHUB_ENV  # Use environment file instead of set-output
+        echo "current_version=$current_version" >> $GITHUB_ENV
       
     - name: Bump version
       id: bump
       run: |
-        # Bump the patch version (the third number)
         version=${{ env.current_version }}
-        new_version=$(echo $version | awk -F. '{printf("%d.%d.%d\n", $1, $2, $3+1)}')
+        # Increment the second number and reset the third
+        new_version=$(echo $version | awk -F. '{printf("%d.%d\n", $1, $2+1)}')
         echo "New version: $new_version"
-        echo "new_version=$new_version" >> $GITHUB_ENV  # Use environment file instead of set-output
+        echo "new_version=$new_version" >> $GITHUB_ENV
       
     - name: Update tag.md with new version
       run: |
         new_version=${{ env.new_version }}
-        # Update the version in tag.md
-        sed -i "s/^# Version.*/# Version $new_version/" tag.md
-      
-    - name: Update versioning log
-      run: |
-        new_version=${{ env.new_version }}
         date=$(date +"%Y-%m-%d")
-        # Append the new version entry to VERSIONING.md
-        echo "| $new_version | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+        user_name=$(git config user.name)
+        
+        # Update the version line
+        sed -i "s/^# Version.*/# Version $new_version/" tag.md
+        
+        # Append the versioning log to the table in tag.md
+        echo "| $new_version | $date | Changes made | $user_name |" >> tag.md
       
     - name: Commit and push changes
+      env:
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use your Personal Access Token (PAT)
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
-        git pull origin main  # Pull the latest changes to avoid conflicts
-        git add tag.md VERSIONING.md
+        git pull origin main
+        git add tag.md
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
-        git push origin main
+        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git

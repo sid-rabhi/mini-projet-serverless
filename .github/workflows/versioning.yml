@@ -1,4 +1,4 @@
-name: Auto Version Bump with GitHub Links
+name: Auto Version Bump with GitHub Blame Links
 
 on:
   push:
@@ -54,14 +54,14 @@ jobs:
         # Get the latest commit hash for linking purposes
         commit_hash=$(git rev-parse HEAD)
         echo "commit_hash=$commit_hash" >> $GITHUB_ENV
-      
-    - name: Update versioning log with GitHub commit link
+
+    - name: Update versioning log with GitHub blame link
       run: |
         new_version=${{ env.new_version }}
         commit_hash=${{ env.commit_hash }}
         date=$(date +"%Y-%m-%d")
-        # Append the new version entry to VERSIONING.md with a link to the commit
-        echo "| [$new_version](https://github.com/${{ github.repository }}/blob/${commit_hash}/tag.md) | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+        # Append the new version entry to VERSIONING.md with a link to the blame view
+        echo "| [$new_version](https://github.com/${{ github.repository }}/blame/${commit_hash}/tag.md) | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
 
     - name: Commit and push VERSIONING.md
       run: |

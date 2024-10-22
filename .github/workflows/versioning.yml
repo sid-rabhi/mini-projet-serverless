@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Use Node.js 20  # Update to Node.js 20
+    - name: Use Node.js 20
       uses: actions/setup-node@v3
       with:
-        node-version: '20'  # Explicitly set Node.js 20
+        node-version: '20'
 
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -31,8 +31,10 @@ jobs:
       id: bump
       run: |
         version=${{ env.current_version }}
-        # Increment the second number and reset the third
-        new_version=$(echo $version | awk -F. '{printf("%d.%d\n", $1, $2+1)}')
+        # Extract the major and minor version numbers, and increment the minor version
+        major=$(echo $version | cut -d '.' -f 1)
+        minor=$(echo $version | cut -d '.' -f 2)
+        new_version="$major.$((minor + 1))"
         echo "New version: $new_version"
         echo "new_version=$new_version" >> $GITHUB_ENV
       

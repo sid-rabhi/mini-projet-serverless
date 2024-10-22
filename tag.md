@@ -1,4 +1,6 @@
-# Version 1.0.1
-kljlkjlkjlkj \br
-kjkjkkj
-kjnjkn
+# Version 1.0
+
+| Version   | Date       | Changes made  | Author            |
+|-----------|------------|---------------|--------------------|
+| 1.0      | 2024-01-01 | Initial release | Your Name         |
+

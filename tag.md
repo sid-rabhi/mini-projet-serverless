@@ -1,4 +1,4 @@
-# Version 2.17
+# Version 2.18
 
 ## _The Last Markdown Editor, Ever_rrrrr
 

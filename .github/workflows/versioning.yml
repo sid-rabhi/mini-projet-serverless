@@ -1,0 +1,55 @@
+name: Auto Version Bump
+
+# Trigger the workflow when tag.md is changed in the 'main' branch
+on:
+  push:
+    paths:
+      - 'tag.md'
+    branches:
+      - main
+
+jobs:
+  bump_version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Get current version
+      id: version
+      run: |
+        # Extract the current version from the tag.md file
+        current_version=$(grep '^# Version' tag.md | cut -d ' ' -f 3)
+        echo "Current version: $current_version"
+        echo "::set-output name=current_version::$current_version"
+      
+    - name: Bump version
+      id: bump
+      run: |
+        # Bump the patch version (the third number)
+        version=${{ steps.version.outputs.current_version }}
+        new_version=$(echo $version | awk -F. '{printf("%d.%d.%d\n", $1, $2, $3+1)}')
+        echo "New version: $new_version"
+        echo "::set-output name=new_version::$new_version"
+      
+    - name: Update tag.md with new version
+      run: |
+        new_version=${{ steps.bump.outputs.new_version }}
+        # Update the version in tag.md
+        sed -i "s/^# Version.*/# Version $new_version/" tag.md
+      
+    - name: Update versioning log
+      run: |
+        new_version=${{ steps.bump.outputs.new_version }}
+        date=$(date +"%Y-%m-%d")
+        # Append the new version entry to VERSIONING.md
+        echo "| $new_version | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+      
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add tag.md VERSIONING.md
+        git commit -m "Bump version to ${{ steps.bump.outputs.new_version }}"
+        git push

@@ -15,32 +15,27 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Install pandoc for PDF generation
+    - name: Install wkhtmltopdf
       run: |
         sudo apt-get update
-        sudo apt-get install -y pandoc
-        
+        sudo apt-get install -y wkhtmltopdf
+
     - name: Get current version
       id: version
       run: |
-        # Extract the current two-part version (e.g., 1.0) from the tag.md file
         current_version=$(grep '^# Version' tag.md | cut -d ' ' -f 3)
-        echo "Current version: $current_version"
         echo "current_version=$current_version" >> $GITHUB_ENV
       
     - name: Bump version
       id: bump
       run: |
-        # Bump the minor version (second number in two-part versioning)
         version=${{ env.current_version }}
-        new_version=$(echo $version | awk -F. '{printf("%d.%d\n", $1, $2+1)}')  # Increment only the minor part
-        echo "New version: $new_version"
+        new_version=$(echo $version | awk -F. '{printf("%d.%d\n", $1, $2+1)}')
         echo "new_version=$new_version" >> $GITHUB_ENV
-      
+
     - name: Update tag.md with new version
       run: |
         new_version=${{ env.new_version }}
-        # Update the version in tag.md
         sed -i "s/^# Version.*/# Version $new_version/" tag.md
 
     - name: Commit and push changes
@@ -56,15 +51,13 @@ jobs:
     - name: Get latest commit hash
       id: commit_hash
       run: |
-        # Get the latest commit hash for linking purposes
         commit_hash=$(git rev-parse HEAD)
         echo "commit_hash=$commit_hash" >> $GITHUB_ENV
 
-    - name: Generate PDF from tag.md
+    - name: Generate PDF from tag.md using wkhtmltopdf
       run: |
         new_version=${{ env.new_version }}
-        # Convert tag.md to PDF with the version in the filename
-        pandoc tag.md -o "tag_${new_version}.pdf"
+        wkhtmltopdf tag.md "tag_${new_version}.pdf"
 
     - name: Commit and push the PDF
       run: |
@@ -75,13 +68,10 @@ jobs:
     - name: Update versioning log with PDF link
       run: |
         new_version=${{ env.new_version }}
-        commit_hash=${{ env.commit_hash }}
-        date=$(date +"%Y-%m-%d")
-        # Append the new version entry to VERSIONING.md with a link to the generated PDF
-        echo "| [$new_version](https://github.com/${{ github.repository }}/raw/main/tag_${new_version}.pdf) | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+        echo "| [$new_version](https://github.com/${{ github.repository }}/raw/main/tag_${new_version}.pdf) | $(date +"%Y-%m-%d") | Changes made | $(git config user.name) |" >> VERSIONING.md
 
     - name: Commit and push VERSIONING.md
       run: |
         git add VERSIONING.md
-        git commit -m "Update versioning log for ${{ env.new_version }}" || echo "No changes to commit"
+        git commit -m "Update versioning log for ${{ env.new_version }}"
         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git

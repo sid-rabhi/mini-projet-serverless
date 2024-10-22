@@ -51,12 +51,10 @@ jobs:
         echo "| $new_version | $date | Changes made | $user_name |" >> tag.md
       
     - name: Commit and push changes
-      env:
-        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use your Personal Access Token (PAT)
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
         git pull origin main
         git add tag.md
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
-        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+        git push

@@ -23,6 +23,7 @@ jobs:
     - name: Get current version
       id: version
       run: |
+        # Extract the current version from the tag.md file
         current_version=$(grep '^# Version' tag.md | cut -d ' ' -f 3)
         echo "Current version: $current_version"
         echo "current_version=$current_version" >> $GITHUB_ENV
@@ -30,55 +31,32 @@ jobs:
     - name: Bump version
       id: bump
       run: |
+        # Bump the patch version (third number in semantic versioning)
         version=${{ env.current_version }}
-        major=$(echo $version | cut -d '.' -f 1)
-        minor=$(echo $version | cut -d '.' -f 2)
-        new_version="$major.$((minor + 1))"  # Increment minor
+        new_version=$(echo $version | awk -F. '{printf("%d.%d.%d\n", $1, $2, $3+1)}')
         echo "New version: $new_version"
         echo "new_version=$new_version" >> $GITHUB_ENV
       
     - name: Update tag.md with new version
       run: |
         new_version=${{ env.new_version }}
+        # Update the version in tag.md
+        sed -i "s/^# Version.*/# Version $new_version/" tag.md
+      
+    - name: Update versioning log
+      run: |
+        new_version=${{ env.new_version }}
         date=$(date +"%Y-%m-%d")
-        user_name=$(git config user.name)
-        
-        # Display current content for debugging
-        echo "Current content of tag.md before update:"
-        cat tag.md
-        
-        # Check if the version line exists
-        if grep -q '^# Version' tag.md; then
-            echo "Found version line in tag.md"
-        else
-            echo "Version line not found!"
-            exit 1
-        fi
-        
-        # Update the version line with a more explicit sed command
-        echo "Running sed command to update version..."
-        sed -i.bak "s/^# Version .*/# Version $new_version/" tag.md
-        
-        # Check if the sed command was successful
-        if [ $? -eq 0 ]; then
-            echo "sed command executed successfully."
-        else
-            echo "sed command failed!"
-            exit 1
-        fi
-        
-        # Display content after sed
-        echo "Content of tag.md after sed command:"
-        cat tag.md
-        
-        # Append the versioning log to the table in tag.md
-        echo "| $new_version | $date | Changes made | $user_name |" >> tag.md || { echo "Failed to append version log"; exit 1; }
-
+        # Append the new version entry to VERSIONING.md
+        echo "| $new_version | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+      
     - name: Commit and push changes
+      env:
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use your Personal Access Token (PAT)
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
-        git pull origin main
-        git add tag.md
+        git pull origin main  # Pull latest changes to avoid conflicts
+        git add tag.md VERSIONING.md
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
-        git push
+        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git

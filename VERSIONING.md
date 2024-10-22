@@ -6,3 +6,4 @@
 | 1.1 | 2024-10-22 | Changes made |  |
 | 1.2 | 2024-10-22 | Changes made |  |
 | 1.3 | 2024-10-22 | Changes made |  |
+| 1.4 | 2024-10-22 | Changes made |  |

@@ -15,3 +15,4 @@
 | [2.14](https://github.com/sid-rabhi/mini-projet-serverless/blame/7ca4a60238cec8b108465a28fb516d95d6961e86/tag.md) | 2024-10-22 | Changes made | github-actions |
 | [2.16](https://github.com/sid-rabhi/mini-projet-serverless/raw/main/tag_2.16.pdf) | 2024-10-22 | Changes made | github-actions |
 | [2.18](https://github.com/sid-rabhi/mini-projet-serverless/raw/main/.tag/tag_2.18.pdf) | 2024-10-22 | Changes made | github-actions |
+| [2.19](https://github.com/sid-rabhi/mini-projet-serverless/raw/main/.tag/tag_2.19.pdf) | 2024-10-22 | Changes made | github-actions |

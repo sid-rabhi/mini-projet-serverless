@@ -12,8 +12,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+
     - name: Checkout repository
-      uses: actions/checkout@v3  # Updated to use v3
+      uses: actions/checkout@v3  # Still using the latest checkout version
       
     - name: Get current version
       id: version
@@ -49,6 +54,7 @@ jobs:
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
+        git pull origin main  # Pull the latest changes to avoid conflicts
         git add tag.md VERSIONING.md
-        git commit -m "Bump version to ${{ env.new_version }}"
-        git push
+        git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
+        git push origin main

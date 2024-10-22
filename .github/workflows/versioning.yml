@@ -1,4 +1,4 @@
-name: Auto Version Bump
+name: Auto Version Bump with GitHub Links
 
 on:
   push:
@@ -12,11 +12,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Use Node.js 20
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-
     - name: Checkout repository
       uses: actions/checkout@v3
 
@@ -42,21 +37,34 @@ jobs:
         new_version=${{ env.new_version }}
         # Update the version in tag.md
         sed -i "s/^# Version.*/# Version $new_version/" tag.md
-      
-    - name: Update versioning log
-      run: |
-        new_version=${{ env.new_version }}
-        date=$(date +"%Y-%m-%d")
-        # Append the new version entry to VERSIONING.md
-        echo "| $new_version | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
-      
+
     - name: Commit and push changes
       env:
-        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}  # Use your Personal Access Token (PAT)
+        PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
-        git pull origin main  # Pull latest changes to avoid conflicts
-        git add tag.md VERSIONING.md
+        git add tag.md
         git commit -m "Bump version to ${{ env.new_version }}" || echo "No changes to commit"
+        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
+
+    - name: Get latest commit hash
+      id: commit_hash
+      run: |
+        # Get the latest commit hash for linking purposes
+        commit_hash=$(git rev-parse HEAD)
+        echo "commit_hash=$commit_hash" >> $GITHUB_ENV
+      
+    - name: Update versioning log with GitHub commit link
+      run: |
+        new_version=${{ env.new_version }}
+        commit_hash=${{ env.commit_hash }}
+        date=$(date +"%Y-%m-%d")
+        # Append the new version entry to VERSIONING.md with a link to the commit
+        echo "| [$new_version](https://github.com/${{ github.repository }}/blob/${commit_hash}/tag.md) | $date | Changes made | $(git config user.name) |" >> VERSIONING.md
+
+    - name: Commit and push VERSIONING.md
+      run: |
+        git add VERSIONING.md
+        git commit -m "Update versioning log for ${{ env.new_version }}" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git

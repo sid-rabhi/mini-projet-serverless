@@ -56,15 +56,13 @@ jobs:
         fi
         
         # Update the version line with a more explicit sed command
-        sed -i "s/^# Version .*/# Version $new_version/" tag.md || { echo "Failed to update version"; exit 1; }
-        
-        # Display content after sed
+        sed -i.bak "s/^# Version .*/# Version $new_version/" tag.md
         echo "Content of tag.md after sed command:"
         cat tag.md
-
+        
         # Append the versioning log to the table in tag.md
         echo "| $new_version | $date | Changes made | $user_name |" >> tag.md || { echo "Failed to append version log"; exit 1; }
-      
+
     - name: Commit and push changes
       run: |
         git config --global user.name "github-actions"

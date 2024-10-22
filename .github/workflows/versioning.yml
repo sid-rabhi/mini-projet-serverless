@@ -56,7 +56,18 @@ jobs:
         fi
         
         # Update the version line with a more explicit sed command
+        echo "Running sed command to update version..."
         sed -i.bak "s/^# Version .*/# Version $new_version/" tag.md
+        
+        # Check if the sed command was successful
+        if [ $? -eq 0 ]; then
+            echo "sed command executed successfully."
+        else
+            echo "sed command failed!"
+            exit 1
+        fi
+        
+        # Display content after sed
         echo "Content of tag.md after sed command:"
         cat tag.md
         

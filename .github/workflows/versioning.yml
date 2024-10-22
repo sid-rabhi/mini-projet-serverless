@@ -31,10 +31,10 @@ jobs:
       id: bump
       run: |
         version=${{ env.current_version }}
-        # Extract the major and minor version numbers, and increment the minor version
+        # Ensure only two segments: major and minor
         major=$(echo $version | cut -d '.' -f 1)
         minor=$(echo $version | cut -d '.' -f 2)
-        new_version="$major.$((minor + 1))"
+        new_version="$major.$((minor + 1))"  # Increment minor
         echo "New version: $new_version"
         echo "new_version=$new_version" >> $GITHUB_ENV
       

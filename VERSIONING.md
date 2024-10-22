@@ -10,3 +10,4 @@
 | 1.9 | 2024-10-22 | Changes made |  |
 | 1.10 | 2024-10-22 | Changes made |  |
 | 2.11 | 2024-10-22 | Changes made |  |
+| [2.12](https://github.com/sid-rabhi/mini-projet-serverless/blob/4d98ee4e5fde94614ec6521a0e0abb0aa6353f0e/tag.md) | 2024-10-22 | Changes made | github-actions |

@@ -1,6 +1,6 @@
 # Version 2.18
 
-## _The Last Markdown Editor, Ever_rrrrr
+## _The Last Markdown Editor, Ever_
 
 [![N|Solid](https://cldup.com/dTxpPi9lDf.thumb.png)](https://nodesource.com/products/nsolid)
 

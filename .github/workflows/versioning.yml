@@ -59,19 +59,24 @@ jobs:
         new_version=${{ env.new_version }}
         wkhtmltopdf tag.md "tag_${new_version}.pdf"
 
+    - name: Move PDF to tag
+      run: |
+        new_version=${{ env.new_version }}
+        mv "tag_${new_version}.pdf" "./tag/tag_${new_version}.pdf"
+
     - name: Commit and push the PDF
       run: |
-        git add "tag_${{ env.new_version }}.pdf"
+        git add "./tag/tag_${{ env.new_version }}.pdf"
         git commit -m "Add PDF for version ${{ env.new_version }}"
         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git
 
     - name: Update versioning log with PDF link
       run: |
         new_version=${{ env.new_version }}
-        echo "| [$new_version](https://github.com/${{ github.repository }}/raw/main/tag_${new_version}.pdf) | $(date +"%Y-%m-%d") | Changes made | $(git config user.name) |" >> VERSIONING.md
+        echo "| [$new_version](https://github.com/${{ github.repository }}/raw/main/tag/tag_${new_version}.pdf) | $(date +"%Y-%m-%d") | Changes made | $(git config user.name) |" >> ./tag/VERSIONING.md
 
     - name: Commit and push VERSIONING.md
       run: |
-        git add VERSIONING.md
+        git add "./tag/VERSIONING.md"  # Ensure to add the VERSIONING.md in the tag directory
         git commit -m "Update versioning log for ${{ env.new_version }}"
         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/${{ github.repository }}.git

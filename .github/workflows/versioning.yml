@@ -23,7 +23,7 @@ jobs:
     - name: Get current version
       id: version
       run: |
-        # Extract the current version from the tag.md file
+        # Extract the current two-part version (e.g., 1.0) from the tag.md file
         current_version=$(grep '^# Version' tag.md | cut -d ' ' -f 3)
         echo "Current version: $current_version"
         echo "current_version=$current_version" >> $GITHUB_ENV
@@ -31,9 +31,9 @@ jobs:
     - name: Bump version
       id: bump
       run: |
-        # Bump the patch version (third number in semantic versioning)
+        # Bump the minor version (second number in two-part versioning)
         version=${{ env.current_version }}
-        new_version=$(echo $version | awk -F. '{printf("%d.%d.%d\n", $1, $2, $3+1)}')
+        new_version=$(echo $version | awk -F. '{printf("%d.%d\n", $1, $2+1)}')  # Increment only the minor part
         echo "New version: $new_version"
         echo "new_version=$new_version" >> $GITHUB_ENV
       

@@ -1,4 +1,4 @@
-# Version 2.19
+# Version 2.20
 To see older versions, follow the [link to the versioning log](https://github.com/<your_username>/<your_repo>/blob/main/.tag/VERSIONING.md).
 ## _The Last Markdown Editor, Ever_
 

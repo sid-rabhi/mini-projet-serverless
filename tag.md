@@ -1,4 +1,4 @@
-# Version 2.23
+# Version 2.24
 To see older versions, follow the [link to the versioning page](https://github.com/sid-rabhi/mini-projet-serverless/blob/main/.tag/VERSIONING.md). hen you finish, make sure to return to the `master` branch.
 ## _The Last Markdown Editor, Ever_
 
